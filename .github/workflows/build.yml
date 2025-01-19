@@ -23,10 +23,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
+      - name: Verificar Gradle
+        run: |
+          cd android
+          ./gradlew -v
       - name: Build
         run: |
           flutter pub get
-          flutter pub deps
           flutter analyze                    
           flutter test                        
           flutter build apk --release        
