@@ -23,13 +23,16 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
+      - name: Verificar Gradle
+        run: gradlew -v
       - name: Build
         run: |
-          flutter pub get                     # Instala dependências
-          flutter analyze                     # Faz análise estática do código
-          flutter test                        # Executa testes (opcional)
-          flutter build apk --release         # Compila o app para Android
-          flutter build ios --release         # Compila o app para iOS
+          flutter pub get
+          flutter pub deps
+          flutter analyze                    
+          flutter test                        
+          flutter build apk --release        
+          flutter build ios --release        
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
