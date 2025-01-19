@@ -26,6 +26,7 @@ jobs:
       - name: Build
         run: |
           flutter pub get
+          flutter pub deps
           flutter analyze                    
           flutter test                        
           flutter build apk         # --release        
