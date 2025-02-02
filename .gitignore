@@ -74,4 +74,4 @@ ios/firebase_app_id_file.json
 ios/Runner/GoogleService-Info.plist
 ios/Runner.xcodeproj/project.pbxproj
 lib/firebase_options.dart
-firebase.json
+./firebase.json
