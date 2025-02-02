@@ -29,12 +29,40 @@ class _SignUpPageState extends State<SignUpPage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
-      });
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text("Registado com sucesso."),
+            content: Text("A sua conta foi registada com sucesso."),
+            actions: [
+              ElevatedButton(
+                onPressed: () async {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    );
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                child: Text('Ok'),
+              ),
+            ],
+          );
+        },
+      );
     } on FirebaseAuthException catch (e) {
       setState(() {
         if (e.code == 'email-already-in-use') {
@@ -56,68 +84,113 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("TaskSync"),
-        automaticallyImplyLeading: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      body: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.purpleAccent, Colors.deepPurple],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Text(
+              "Registar",
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white
+              ),
+            ),
+            const SizedBox(height: 20),
             TextField(
               controller: _emailController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'Introduza o seu email...',
-                border: OutlineInputBorder(),
+                hintText: "Email",
+                hintStyle: TextStyle(color: Colors.white70),
+                prefixIcon: Icon(Icons.email, color: Colors.white),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.2),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 10),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                hintText: 'Introduza a sua password...',
-                border: OutlineInputBorder(),
-              ),
               obscureText: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: "Password",
+                hintStyle: TextStyle(color: Colors.white70),
+                prefixIcon: Icon(Icons.lock, color: Colors.white),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.2),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+              ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 10),
             TextField(
               controller: _confirmPasswordController,
-              decoration: InputDecoration(
-                labelText: 'Repetir Password',
-                hintText: 'Repita a sua password...',
-                border: OutlineInputBorder(),
-              ),
               obscureText: true,
-            ),
-            if (_errorMessage.isNotEmpty) ...[
-              SizedBox(height: 20),
-              Text(
-                _errorMessage,
-                style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: "Repetir Password",
+                hintStyle: TextStyle(color: Colors.white70),
+                prefixIcon: Icon(Icons.lock, color: Colors.white),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.2),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
-            ],
-            SizedBox(height: 20),
+            ),
+            const SizedBox(height: 20),
+            if (_errorMessage.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 15),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ElevatedButton(
               onPressed: _signUp,
-              child: Text("Sign Up"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.purple,
+                padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              ),
+              child: const Text("Registar", style: TextStyle(fontSize: 18)),
             ),
-            SizedBox(height: 40),
-            ElevatedButton(
+            const SizedBox(height: 15),
+            TextButton(
               onPressed: () {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
-                });
+                Navigator.pop(context);
               },
-              child: Text("Login"),
+              child: const Text(
+                "Já tem uma conta? Faça login.",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),

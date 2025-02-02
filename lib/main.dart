@@ -19,10 +19,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TaskSync',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF0CCEFA)),
-        useMaterial3: true,
-      ),
       home: const VerificarLogin(),
     );
   }
