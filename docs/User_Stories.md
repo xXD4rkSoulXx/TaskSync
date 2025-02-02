@@ -1,9 +1,9 @@
 ### **User Storie Funcionais**  
 1. **Registo**  
-   *Como novo utilizador, quero criar uma conta com email e senha para aceder à aplicação.*  
+   *Como novo utilizador, quero criar uma conta com email e password para aceder à aplicação.*  
 
 2. **Login**  
-   *Como utilizador registado, quero autenticar-me com email e senha para gerir as minhas tarefas.*  
+   *Como utilizador registado, quero autenticar-me com email e password para gerir as minhas tarefas.*  
 
 3. **Criar Tarefa**  
    *Como utilizador, quero adicionar tarefas com descrição e categoria para organizar as minhas atividades diárias.*  
