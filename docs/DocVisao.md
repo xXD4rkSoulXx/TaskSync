@@ -56,4 +56,3 @@ O TaskSync é um aplicativo móvel multiplataforma (Android/iOS) que visa simpli
 - **Backend**:  
   - **Firebase Auth**: Autenticação de usuários.  
   - **Cloud Firestore**: Armazenamento de tarefas em tempo real.  
-- **Padrão de Design**: Model-View-ViewModel (MVVM) para separação de camadas.  
