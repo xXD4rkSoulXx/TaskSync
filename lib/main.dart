@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'pages/verificar_login.dart';
+import 'package:tasksync/pages/verificar_login.dart';
 
 void main() async {
+  // Inicialização do Firebase
+  // --------------------------------------------------------
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // --------------------------------------------------------
   runApp(const MyApp());
 }
 
