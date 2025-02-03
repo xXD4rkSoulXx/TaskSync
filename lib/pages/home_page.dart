@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'login.dart';
-import 'historico.dart';
+import 'package:tasksync/pages/login.dart';
+import 'package:tasksync/pages/historico.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -14,77 +14,114 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<String> categorias = [];
   final List<Map<String, dynamic>> tarefas = [];
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  User? _currentUser;
+  final FirebaseAuth autenticacao = FirebaseAuth.instance;
+  final FirebaseFirestore dadosFirebase = FirebaseFirestore.instance;
+  User? utilizador;
 
-  void _getCurrentUser() {
-    _auth.authStateChanges().listen((user) {
+  // Função para obter os dados do utilizador logado
+  // --------------------------------------------------------
+  void getUtilizador() {
+    autenticacao.authStateChanges().listen((user) {
       if (user != null) {
         setState(() {
-          _currentUser = _auth.currentUser;
+          utilizador = autenticacao.currentUser;
         });
-        _getTasks();
+        getTarefas();
       }
     });
   }
+  // --------------------------------------------------------
 
-  Future<void> _getCategorias() async {
+
+  // Função para obter as categorias pré definidas
+  // --------------------------------------------------------
+  Future<void> getCategorias() async {
     try {
-      final snapshot = await _firestore.collection('Categorias').get();
+      final dados = await dadosFirebase.collection('Categorias').get();
       setState(() {
-        categorias = snapshot.docs.map((doc) => doc['categoria'].toString()).toList();
+        categorias = dados.docs.map((doc) => doc['categoria'].toString()).toList();
       });
     } catch(e) {
-      print("Erro ao buscar categorias: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Erro ao carregar categorias. Tente novamente mais tarde.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
+  // --------------------------------------------------------
 
-  Future<void> _getTasks() async {
+  // Função para obter as tarefas do utilizador
+  // --------------------------------------------------------
+  Future<void> getTarefas() async {
     try {
-      final snapshot = await _firestore.collection('Tarefas').where('userID', isEqualTo: _currentUser?.uid).where('feito', isEqualTo: false).get();
+      final dados = await dadosFirebase.collection('Tarefas').where('userID', isEqualTo: utilizador?.uid).where('feito', isEqualTo: false).get();
       setState(() {
         tarefas.clear();
-        for (var docs in snapshot.docs) {
+        for (var documentos in dados.docs) {
           tarefas.add({
-            'id': docs.id,
-            'descricao': docs['descricao'],
-            'categoria': docs['categoria'],
-            'feito': docs['feito'],
-            'userID': docs['userID'],
+            'id': documentos.id,
+            'descricao': documentos['descricao'],
+            'categoria': documentos['categoria'],
+            'feito': documentos['feito'],
+            'userID': documentos['userID'],
           });
         }
       });
     } catch(e) {
-      print("Erro ao buscar as tarefas: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar tarefas. Tente novamente mais tarde.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
+  // --------------------------------------------------------
 
+  // Sempre que a página atualiza, setState, executa sempre estas funções antes de tudo
+  // --------------------------------------------------------
   @override
   void initState() {
     super.initState();
-    _getCurrentUser();
-    _getCategorias();
+    getUtilizador();
+    getCategorias();
   }
+  // --------------------------------------------------------
 
-  void _markTaskAsCompleted(int index) async {
-    final String taskID = tarefas[index]['id'];
-
-    await _firestore.collection('Tarefas').doc(taskID).update({'feito': true});
+  // Função que marca a tarefa como concluída
+  // --------------------------------------------------------
+  void setTarefaConcluida(int index) async {
+    await dadosFirebase.collection('Tarefas').doc(tarefas[index]['id']).update({'feito': true});
     setState(() {
       tarefas.removeAt(index);
     });
   }
+  // --------------------------------------------------------
 
-  void _openTaskDialog({int? index}) {
-    String taskDescription = index != null ? tarefas[index]['descricao'] : '';
-    String? selectedCategorie = index != null ? tarefas[index]['categoria'] : null;
+  // Esta função vai Adicionar ou Editar tarefa consoante o botão clicado
+  // Ela possui um parâmetro opcional index, se ao chamar a função função e preencher
+  // o index, significa que a tarefa está em alguma posição já definida, logo é para editar
+  // porque apenas as tarefas já listadas têm index. Agora se não tiver index, significa que
+  // ainda não está listado, o que indica que é adicionar tarefa pois é uma tarefa nova com index
+  // --------------------------------------------------------
+  void adicionarEditarTarefa({int? index}) {
+    String descricao = index != null ? tarefas[index]['descricao'] : '';
+    String? categoria = index != null ? tarefas[index]['categoria'] : null;
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          // Layout do showDialog
+          // -----------------
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -92,10 +129,13 @@ class _MyHomePageState extends State<MyHomePage> {
             index == null ? 'Adicionar Tarefa' : 'Editar Tarefa',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
+          // -----------------
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Caixa de Texto da categoria
+                // --------
                 TextFormField(
                   decoration: InputDecoration(
                     labelText: 'Descrição',
@@ -105,10 +145,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     filled: true,
                     fillColor: Colors.grey[200],
                   ),
-                  initialValue: taskDescription,
-                  onChanged: (value) => taskDescription = value,
+                  initialValue: descricao,
+                  onChanged: (value) => descricao = value,
                 ),
+                // --------
                 SizedBox(height: 12),
+                // Caixa de Seleção de Categorias
+                // --------
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Categoria',
@@ -118,19 +161,22 @@ class _MyHomePageState extends State<MyHomePage> {
                     filled: true,
                     fillColor: Colors.grey[200],
                   ),
-                  value: selectedCategorie,
+                  value: categoria,
                   items: categorias.map((String categorie) {
                     return DropdownMenuItem<String>(
                       value: categorie,
                       child: Text(categorie),
                     );
                   }).toList(),
-                  onChanged: (value) => selectedCategorie = value,
+                  onChanged: (value) => categoria = value,
                 ),
+                // ---------
               ],
             ),
           ),
           actions: [
+            // Botão cancelar
+            // ---------
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               style: TextButton.styleFrom(
@@ -139,38 +185,50 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               child: Text('Cancelar'),
             ),
+            // ---------
+            // Botão Salvar
+            // ----------------------------
             ElevatedButton(
               onPressed: () async {
-                if (taskDescription.isNotEmpty && selectedCategorie != null) {
+                // Verifica se todos os campos estão preenchidos, para não deixar
+                // o utlizador meter tarefas vazias
+                if (descricao.isNotEmpty && categoria != null) {
                   if (index == null) {
-                    final tarefaId = await _firestore.collection('Tarefas').add({
-                      'descricao': taskDescription,
-                      'categoria': selectedCategorie!,
+                    // Adicionar Tarefa
+                    // -----------
+                    final idTarefa = await dadosFirebase.collection('Tarefas').add({
+                      'descricao': descricao,
+                      'categoria': categoria!,
                       'feito': false,
-                      'userID': _currentUser?.uid,
+                      'userID': utilizador?.uid,
                     });
                     setState(() {
                       tarefas.add({
-                        'id': tarefaId.id,
-                        'descricao': taskDescription,
-                        'categoria': selectedCategorie!,
+                        'id': idTarefa.id,
+                        'descricao': descricao,
+                        'categoria': categoria!,
                         'feito': false,
-                        'userID': _currentUser?.uid,
+                        'userID': utilizador?.uid,
                       });
                     });
+                    // ------------
                   } else {
-                    final tarefaId = tarefas[index]['id'];
-                    await _firestore.collection('Tarefas').doc(tarefaId).update({
-                      'descricao': taskDescription,
-                      'categoria': selectedCategorie!,
+                    // Editar Tarefa
+                    // --------
+                    await dadosFirebase.collection('Tarefas').doc(tarefas[index]['id']).update({
+                      'descricao': descricao,
+                      'categoria': categoria!,
                     });
                     setState(() {
-                      tarefas[index]['descricao'] = taskDescription;
-                      tarefas[index]['categoria'] = selectedCategorie!;
+                      tarefas[index]['descricao'] = descricao;
+                      tarefas[index]['categoria'] = categoria!;
                     });
+                    // ---------
                   }
                   Navigator.of(context).pop();
                 } else {
+                  // Mensagem que aparece em baixo para preencher todos os campos
+                  // -------------
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Preencha todos os campos!'),
@@ -178,8 +236,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
+                  // -------------
                 }
               },
+              // Layout do botão Salvar
+              // -----------------
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.tealAccent[700],
                 foregroundColor: Colors.white,
@@ -188,26 +249,36 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
+              // -----------------
               child: Text('Salvar'),
             ),
+            // ------------------------
           ],
         );
       },
     );
   }
+  // --------------------------------------------------------
 
-  void _deleteTask(int index) {
+  // Função que elimina a tarefa
+  // --------------------------------------------------------
+  void eliminarTarefa(int index) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          // Layout do showDialog
+          // -----------------
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text('Eliminar', style: TextStyle(fontWeight: FontWeight.bold)),
           content: Text('Tem certeza de que deseja mesmo eliminar esta tarefa?'),
+          // -----------------
           actions: [
+            // Botão cancelar
+            // ---------
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               style: TextButton.styleFrom(
@@ -216,16 +287,22 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               child: Text('Cancelar'),
             ),
+            // ---------
+            // Botão Eliminar
+            // ---------
             ElevatedButton(
+              // Eliminar Tarefa
+              // ----------
               onPressed: () async {
-                final String tarefaId = tarefas[index]['id'];
-
-                await _firestore.collection('Tarefas').doc(tarefaId).delete();
+                await dadosFirebase.collection('Tarefas').doc(tarefas[index]['id']).delete();
                 setState(() {
                   tarefas.removeAt(index);
                 });
                 Navigator.of(context).pop();
               },
+              // -----------
+              // Layout do botão Eliminar
+              // ------------
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.redAccent,
                 foregroundColor: Colors.white,
@@ -235,15 +312,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               child: Text('Eliminar'),
+              // -------------
             ),
+            // ---------
           ],
         );
       },
     );
   }
+  // --------------------------------------------------------
 
-  Future<void> _logout() async {
-    await _auth.signOut();
+  // Função que termina sessão
+  // --------------------------------------------------------
+  Future<void> logout() async {
+    await autenticacao.signOut();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.push(
         context,
@@ -251,10 +333,13 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     });
   }
+  // --------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Layout da parte de cima da página
+      // --------------------------------------------------------
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.tealAccent[700],
@@ -262,13 +347,16 @@ class _MyHomePageState extends State<MyHomePage> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            onPressed: _logout,
+            onPressed: logout,
             icon: const Icon(Icons.logout, size: 30, color: Colors.white),
             tooltip: 'Terminar sessão',
           ),
         ],
       ),
+      // --------------------------------------------------------
       body: Container(
+        // Fundo da página, transição das cores
+        // --------------------------------------------------------
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
@@ -276,33 +364,48 @@ class _MyHomePageState extends State<MyHomePage> {
             end: Alignment.bottomRight,
           ),
         ),
+        // --------------------------------------------------------
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
             children: [
               const SizedBox(height: 20),
               Expanded(
+                // Verifica se tem tarefas ou não
                 child: tarefas.isEmpty
+                  // Quando não tem tarefas, aparece mensagem a informar que não tem
+                  // tarefas criadas
+                  // -----
                   ? const Center(
                     child: Text(
                       'Nenhuma tarefa criada ainda!',
                       style: TextStyle(fontSize: 18, color: Colors.white70),
                     ),
                   )
+                  // -----
+                  // Quando tem tarefas, faz aparecer a lista de todas as tarefas
+                  // -----
                   : ListView.builder(
                       itemCount: tarefas.length,
                       itemBuilder: (context, index) {
+                        // Layout de cada tarefa
+                        // --------------------
                         return Card(
-                          color: Colors.white.withOpacity(0.9),
+                          // Layout do cardão
+                          // ---
+                          color: Colors.white.withAlpha(239),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
                           elevation: 6,
                           margin: const EdgeInsets.symmetric(vertical: 8),
+                          // ---
                           child: ListTile(
+                            // Botão circular de marcar concluída a tarefa
+                            // ------
                             contentPadding: const EdgeInsets.all(15),
                             leading: GestureDetector(
-                              onTap: () => _markTaskAsCompleted(index),
+                              onTap: () => setTarefaConcluida(index),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 300),
                                 width: 30,
@@ -313,6 +416,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                               ),
                             ),
+                            // ------
+                            // Descrição da tarefa
+                            // ------
                             title: Text(
                               tarefas[index]['descricao'],
                               style: const TextStyle(
@@ -321,6 +427,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                 color: Colors.black54,
                               ),
                             ),
+                            // ------
+                            // Categoria da tarefa
+                            // ------
                             subtitle: Text(
                               tarefas[index]['categoria'],
                               style: const TextStyle(
@@ -329,35 +438,46 @@ class _MyHomePageState extends State<MyHomePage> {
                                 color: Colors.black45,
                               ),
                             ),
+                            // ------
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // Ícone de Editar Tarefa
+                                // ------
                                 CircleAvatar(
-                                  backgroundColor: Colors.blueAccent.withOpacity(0.2),
+                                  backgroundColor: Colors.blueAccent.withAlpha(51),
                                   radius: 22,
                                   child: IconButton(
-                                    onPressed: () => _openTaskDialog(index: index),
+                                    onPressed: () => adicionarEditarTarefa(index: index),
                                     icon: Icon(Icons.mode_edit_outline_rounded, color: Colors.blueAccent, size: 26),
                                     tooltip: "Editar tarefa",
                                   ),
                                 ),
+                                // ------
                                 SizedBox(width: 10),
+                                // Ícone de Eliminar Tarefa
+                                // ------
                                 CircleAvatar(
-                                  backgroundColor: Colors.redAccent.withOpacity(0.2),
+                                  backgroundColor: Colors.redAccent.withAlpha(51),
                                   radius: 22,
                                   child: IconButton(
-                                    onPressed: () => _deleteTask(index),
+                                    onPressed: () => eliminarTarefa(index),
                                     icon: Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 26),
                                     tooltip: "Eliminar tarefa",
                                   ),
                                 ),
+                                // ------
                               ],
                             ),
                           ),
                         );
+                        // --------------------
                       },
                     ),
+                  // ------
               ),
+              // Botão Histórico
+              // --------------------------------------------------------
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20.0),
                 child: ElevatedButton.icon(
@@ -385,18 +505,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
+              // --------------------------------------------------------
               SizedBox(height: 20),
             ],
           ),
         ),
       ),
+      // Botão adicionar tarefa
+      // --------------------------------------------------------
       floatingActionButton: FloatingActionButton(
-        onPressed: _openTaskDialog,
+        onPressed: adicionarEditarTarefa,
         backgroundColor: Colors.tealAccent[700],
         foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
         tooltip: 'Adicionar tarefa',
+        child: const Icon(Icons.add),
       ),
+      // --------------------------------------------------------
     );
   }
 }
