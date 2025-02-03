@@ -148,7 +148,7 @@ class _HistoricoState extends State<Historico> {
                         // Layout de cada tarefa
                         // --------------------
                         return Card(
-                          // Layout do cardão
+                          // Layout do cartão
                           // ---
                           color: Colors.white.withAlpha(230),
                           shape: RoundedRectangleBorder(
