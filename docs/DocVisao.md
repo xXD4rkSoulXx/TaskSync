@@ -28,13 +28,13 @@ O TaskSync é um aplicação móvel multiplataforma (Android/iOS) que visa simpl
 ---
 
 ## **Equipa do Projeto**  
-- **[Afonso Carrasquinho.](https://github.com/Afonso295)**: Desenvolvimento Frontend (Flutter).  
-- **[Diogo Vieira.](https://github.com/xXD4rkSoulXx)**: Integração Backend (Firebase).
+- **[Afonso Carrasquinho](https://github.com/Afonso295)**: Desenvolvimento Frontend (Flutter).  
+- **[Diogo Vieira](https://github.com/xXD4rkSoulXx)**: Integração Backend (Firebase).
 
 ---
 
 ## **Características do Produto**  
-- **Autenticação Segura**: Registro e login com Firebase Auth.  
+- **Autenticação Segura**: Registo e login com Firebase Auth.  
 - **Gestão de Tarefas**:  
   - Adicionar tarefas com descrição e categoria.  
   - Editar ou eliminar tarefas com confirmação de segurança.  
@@ -54,7 +54,7 @@ O TaskSync é um aplicação móvel multiplataforma (Android/iOS) que visa simpl
 ## **Arquitetura**  
 - **Frontend**: Desenvolvido em **Flutter** (Dart) com componentes reativos.  
 - **Backend**:  
-  - **Firebase Auth**: Autenticação de usuários.  
+  - **Firebase Auth**: Autenticação de utilizadores.  
   - **Cloud Firestore**: Armazenamento de tarefas em tempo real.
   - **Padrão de Design**: Model-View-ViewModel (MVVM) para separação de camadas.  
 
