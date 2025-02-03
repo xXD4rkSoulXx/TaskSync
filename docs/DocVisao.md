@@ -20,7 +20,7 @@ O TaskSync é um aplicação móvel multiplataforma (Android/iOS) que visa simpl
 ## **Partes Interessadas (Stakeholders)**  
 | **Papel**               | **Interesse**                          |  
 |-------------------------|----------------------------------------|  
-| Utilizador Individuais    | Organizar tarefas do dia a dia.        |  
+| Utilizadores Individuais    | Organizar tarefas do dia a dia.        |  
 | Profissionais           | Gerenciar metas e prazos profissionais.|  
 | Equipa de Desenvolvimento | Garantir funcionalidade e segurança.  |  
 | Google (Firebase)       | Fornecer infraestrutura de backend.    |  
@@ -28,8 +28,8 @@ O TaskSync é um aplicação móvel multiplataforma (Android/iOS) que visa simpl
 ---
 
 ## **Equipa do Projeto**  
-- **[Diogo Vieira.](https://github.com/xXD4rkSoulXx)**: Integração Backend (Firebase).
 - **[Afonso Carrasquinho.](https://github.com/Afonso295)**: Desenvolvimento Frontend (Flutter).  
+- **[Diogo Vieira.](https://github.com/xXD4rkSoulXx)**: Integração Backend (Firebase).
 
 ---
 
