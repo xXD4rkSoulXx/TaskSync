@@ -391,7 +391,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         // Layout de cada tarefa
                         // --------------------
                         return Card(
-                          // Layout do cardão
+                          // Layout do cartão
                           // ---
                           color: Colors.white.withAlpha(239),
                           shape: RoundedRectangleBorder(
