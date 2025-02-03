@@ -21,8 +21,8 @@ O TaskSync é um aplicação móvel multiplataforma (Android/iOS) que visa simpl
 | **Papel**               | **Interesse**                          |  
 |-------------------------|----------------------------------------|  
 | Utilizadores Individuais    | Organizar tarefas do dia a dia.        |  
-| Profissionais           | Gerenciar metas e prazos profissionais.|  
-| Equipa de Desenvolvimento | Garantir funcionalidade e segurança.  |  
+| Profissionais           | Gerir metas e prazos profissionais.|  
+| Equipa de Desenvolvimento | Gerir funcionalidade e segurança.  |  
 | Google (Firebase)       | Fornecer infraestrutura de backend.    |  
 
 ---
