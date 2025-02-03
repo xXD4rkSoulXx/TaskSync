@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login.dart';
+import 'package:tasksync/pages/login.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -10,81 +10,102 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  String _errorMessage = '';
+  final TextEditingController caixatextoEmail = TextEditingController();
+  final TextEditingController caixatextoPassword = TextEditingController();
+  final TextEditingController caixatextoRepetirPassword = TextEditingController();
+  final FirebaseAuth autenticacao = FirebaseAuth.instance;
+  String mensagemErro = '';
 
-  Future<void> _signUp() async {
-    if (_passwordController.text != _confirmPasswordController.text) {
+  // Função responsável por registar o utilizador
+  // --------------------------------------------------------
+  Future<void> signUp() async {
+    // Verifica se as passwords coincidem para o utilizador ter certeza
+    // de que não se enganou
+    // -------------
+    if (caixatextoEmail.text != caixatextoPassword.text) {
       setState(() {
-        _errorMessage = 'As passwords não coincidem.';
+        mensagemErro = 'As passwords não coincidem.';
       });
       return;
     }
+    // ------------
 
     try {
-      await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
+      // Código de registar utilizador no Firebase
+      // ------------
+      await autenticacao.createUserWithEmailAndPassword(
+        email: caixatextoEmail.text,
+        password: caixatextoPassword.text,
       );
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Text("Registado com sucesso."),
-            content: Text("A sua conta foi registada com sucesso."),
-            actions: [
-              ElevatedButton(
-                onPressed: () async {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
-                    );
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                child: Text('Ok'),
+      // -----------
+      // ShowDialog informativo que o registo foi bem sucedido e redireciona
+      // para o login
+      // -----------
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-            ],
-          );
-        },
-      );
+              title: Text("Registado com sucesso."),
+              content: Text("A sua conta foi registada com sucesso."),
+              actions: [
+                ElevatedButton(
+                  onPressed: () async {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage()),
+                      );
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: Text('Ok'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+      // -----------
     } on FirebaseAuthException catch (e) {
+      // Faz as validações de registo
+      // -----------
       setState(() {
         if (e.code == 'email-already-in-use') {
-          _errorMessage = 'O email já existe.';
+          mensagemErro = 'O email já existe.';
         }
         else if(e.code == 'invalid-email') {
-          _errorMessage = 'O formato do email é inválido.';
+          mensagemErro = 'O formato do email é inválido.';
         }
         else if(e.code == 'weak-password') {
-          _errorMessage = 'Password fraca. Tem que ter pelo menos 6 caractéres.';
+          mensagemErro = 'Password fraca. Tem que ter pelo menos 6 caractéres.';
         }
         else {
-          _errorMessage = 'Ocorreu um erro. Tente novamente mais tarde.';
+          mensagemErro = 'Ocorreu um erro. Tente novamente mais tarde.';
         }
       });
     }
+    // -------------
+    // --------------------------------------------------------
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        // Layout do fundo
+        // --------------------------------------------------------
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -93,9 +114,12 @@ class _SignUpPageState extends State<SignUpPage> {
             end: Alignment.bottomCenter,
           ),
         ),
+        // --------------------------------------------------------
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Título Registar
+            // --------------------------------------------------------
             const Text(
               "Registar",
               style: TextStyle(
@@ -104,23 +128,29 @@ class _SignUpPageState extends State<SignUpPage> {
                 color: Colors.white
               ),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 20),
+            // Caixa de texto do Email
+            // --------------------------------------------------------
             TextField(
-              controller: _emailController,
+              controller: caixatextoEmail,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: "Email",
                 hintStyle: TextStyle(color: Colors.white70),
                 prefixIcon: Icon(Icons.email, color: Colors.white),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.2),
+                fillColor: Colors.white..withAlpha(51),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                 contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 10),
+            // Caixa de texto da Password
+            // --------------------------------------------------------
             TextField(
-              controller: _passwordController,
+              controller: caixatextoPassword,
               obscureText: true,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
@@ -128,14 +158,17 @@ class _SignUpPageState extends State<SignUpPage> {
                 hintStyle: TextStyle(color: Colors.white70),
                 prefixIcon: Icon(Icons.lock, color: Colors.white),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.2),
+                fillColor: Colors.white.withAlpha(51),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                 contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 10),
+            // Caixa de texto de Repetir Password
+            // --------------------------------------------------------
             TextField(
-              controller: _confirmPasswordController,
+              controller: caixatextoRepetirPassword,
               obscureText: true,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
@@ -143,18 +176,21 @@ class _SignUpPageState extends State<SignUpPage> {
                 hintStyle: TextStyle(color: Colors.white70),
                 prefixIcon: Icon(Icons.lock, color: Colors.white),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.2),
+                fillColor: Colors.white.withAlpha(51),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                 contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 20),
-            if (_errorMessage.isNotEmpty)
+            // Mensagem de erro
+            // --------------------------------------------------------
+            if (mensagemErro.isNotEmpty)
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 15),
                 decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.9),
+                  color: Colors.redAccent.withAlpha(230),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -164,7 +200,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _errorMessage,
+                        mensagemErro,
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
@@ -172,8 +208,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   ],
                 ),
               ),
+            // --------------------------------------------------------
+            // Botão de Registar
+            // --------------------------------------------------------
             ElevatedButton(
-              onPressed: _signUp,
+              onPressed: signUp,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.purple,
@@ -182,16 +221,25 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               child: const Text("Registar", style: TextStyle(fontSize: 18)),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 15),
+            // Mensagem a perguntar se já tem conta e redirecionar para a página Login
+            // --------------------------------------------------------
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
+                });
               },
               child: const Text(
                 "Já tem uma conta? Faça login.",
                 style: TextStyle(color: Colors.white),
               ),
             ),
+            // --------------------------------------------------------
           ],
         ),
       ),
