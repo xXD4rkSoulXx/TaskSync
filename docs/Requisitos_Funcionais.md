@@ -4,7 +4,7 @@
 3. **Logout** da conta.  
 4. **Criação de tarefas** com descrição e categoria (armazenadas no Firestore).  
 5. **Edição de tarefas** (descrição e categoria).  
-6. **Exclusão de tarefas** com confirmação via diálogo.  
+6. **Eliminação de tarefas** com confirmação via diálogo.  
 7. **Marcar tarefas como concluídas** (atualização do campo `feito` para `true`).  
 8. **Exibição do histórico de tarefas concluídas**.  
 9. **Desfazer conclusão de tarefas** (marcar como "não concluída" no histórico).  
