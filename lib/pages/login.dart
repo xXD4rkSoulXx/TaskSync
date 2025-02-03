@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'sign_up.dart';
-import 'home_page.dart';
+import 'package:tasksync/pages/sign_up.dart';
+import 'package:tasksync/pages/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,34 +11,48 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  String _errorMessage = '';
+  final TextEditingController caixatextoEmail = TextEditingController();
+  final TextEditingController caixatextoPassword = TextEditingController();
+  final FirebaseAuth autenticacao = FirebaseAuth.instance;
+  String mensagemErro = '';
 
-  Future<void> _login() async {
+  // Função responsável pelo login
+  // --------------------------------------------------------
+  Future<void> login() async {
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
+      // Código do login com firebase
+      // --------
+      await autenticacao.signInWithEmailAndPassword(
+        email: caixatextoEmail.text,
+        password: caixatextoPassword.text,
       );
+      // --------
+      // Depois que o login foi bem sucedido redireciona para a página principal
+      // --------
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => MyHomePage()),
         );
       });
-    } on FirebaseAuthException catch (e) {
+      // --------
+    } on FirebaseAuthException {
+      // Caso o email e a password estejam errados, configura esta mensagem de erro
+      // -------
       setState(() {
-        _errorMessage = 'Password incorreta.';
+        mensagemErro = 'Password incorreta.';
       });
+      // -------
     }
   }
+  // --------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        // Layout do fundo
+        // --------------------------------------------------------
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -47,9 +61,12 @@ class _LoginPageState extends State<LoginPage> {
             end: Alignment.bottomCenter,
           ),
         ),
+        // --------------------------------------------------------
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Título TaskSync
+            // --------------------------------------------------------
             const Text(
               "TaskSync",
               style: TextStyle(
@@ -58,23 +75,29 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.white,
               ),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 20),
+            // Caixa de texto do Email
+            // --------------------------------------------------------
             TextField(
-              controller: _emailController,
+              controller: caixatextoEmail,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: "Email",
                 hintStyle: TextStyle(color: Colors.white70),
                 prefixIcon: Icon(Icons.email, color: Colors.white),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.2),
+                fillColor: Colors.white.withAlpha(51),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                 contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 10),
+            // Caixa de texto da Password
+            // --------------------------------------------------------
             TextField(
-              controller: _passwordController,
+              controller: caixatextoPassword,
               obscureText: true,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
@@ -82,18 +105,21 @@ class _LoginPageState extends State<LoginPage> {
                 hintStyle: TextStyle(color: Colors.white70),
                 prefixIcon: Icon(Icons.lock, color: Colors.white),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.2),
+                fillColor: Colors.white.withAlpha(51),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                 contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 20),
-            if (_errorMessage.isNotEmpty)
+            // Mensagem de erro
+            // --------------------------------------------------------
+            if (mensagemErro.isNotEmpty)
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 15),
                 decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.9),
+                  color: Colors.redAccent.withAlpha(230),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -103,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _errorMessage,
+                        mensagemErro,
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
@@ -111,8 +137,11 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
+            // --------------------------------------------------------
+            // Botão de login
+            // --------------------------------------------------------
             ElevatedButton(
-              onPressed: _login,
+              onPressed: login,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blueAccent,
@@ -121,19 +150,25 @@ class _LoginPageState extends State<LoginPage> {
               ),
               child: const Text("Entrar", style: TextStyle(fontSize: 18)),
             ),
+            // --------------------------------------------------------
             const SizedBox(height: 15),
+            // Mensagem a perguntar se não tem conta e redirecionar para a página Sign Up
+            // --------------------------------------------------------
             TextButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignUpPage()),
-                );
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpPage()),
+                  );
+                });
               },
               child: const Text(
                 "Não tem conta? Registe-se",
                 style: TextStyle(color: Colors.white),
               ),
             ),
+            // --------------------------------------------------------
           ],
         ),
       ),

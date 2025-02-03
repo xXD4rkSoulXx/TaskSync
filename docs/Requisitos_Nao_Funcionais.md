@@ -21,7 +21,7 @@
 9. **Privacidade**:  
    - Dados do utilizador armazenados apenas com seu `userID`.  
 10. **Documentação**:  
-    - Nomes claros de variáveis e métodos (ex: `_markTaskAsCompleted`).
+    - Nomes claros de variáveis e métodos (ex: `setTarefaConcluida`).
 11. **Latência**:  
     - Sincronização quase instantânea com Firestore após ações.  
 12. **Feedback visual**:  
@@ -32,7 +32,7 @@
 14. **Eficiência**:  
     - Consultas filtradas no Firestore (ex: `where('feito', isEqualTo: false)`).  
 15. **Testabilidade**:  
-    - Separação lógica entre UI e regras de negócio (ex: métodos `_login`, `_signUp`).  
+    - Separação lógica entre UI e regras de negócio (ex: métodos `login`, `signUp`).  
 16. **Escalabilidade**:  
     - Suporte a múltiplos utilizadores com dados isolados no Firestore.  
 17. **Conformidade**:  
