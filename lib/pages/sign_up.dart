@@ -140,7 +140,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 hintStyle: TextStyle(color: Colors.white70),
                 prefixIcon: Icon(Icons.email, color: Colors.white),
                 filled: true,
-                fillColor: Colors.white..withAlpha(51),
+                fillColor: Colors.white.withAlpha(51),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
                 contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               ),
