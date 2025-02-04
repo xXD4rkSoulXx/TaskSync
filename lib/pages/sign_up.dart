@@ -22,7 +22,7 @@ class _SignUpPageState extends State<SignUpPage> {
     // Verifica se as passwords coincidem para o utilizador ter certeza
     // de que não se enganou
     // -------------
-    if (caixatextoEmail.text != caixatextoPassword.text) {
+    if (caixatextoPassword.text != caixatextoRepetirPassword.text) {
       setState(() {
         mensagemErro = 'As passwords não coincidem.';
       });
